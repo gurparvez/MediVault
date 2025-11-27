@@ -1,11 +1,10 @@
 import { View, Text, StyleSheet } from 'react-native';
 import { Colors } from '../../constants/Colors';
 
-export default function HomeScreen() {
+export default function CalendarScreen() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Welcome to MediVault</Text>
-      <Text style={styles.subtitle}>Your health, secure and sorted.</Text>
+      <Text style={styles.text}>Appointments & Reminders</Text>
     </View>
   );
 }
@@ -17,14 +16,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
+  text: {
+    fontSize: 18,
     color: Colors.text,
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: Colors.textSecondary,
   },
 });
