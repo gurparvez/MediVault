@@ -1,8 +1,9 @@
-import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
-import { useState, useRef } from 'react';
-import { Button, StyleSheet, Text, TouchableOpacity, View, Image, SafeAreaView } from 'react-native';
-import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { CameraType, CameraView, useCameraPermissions } from 'expo-camera';
+import * as ImagePicker from 'expo-image-picker';
+import { useRouter } from 'expo-router';
+import { useEffect, useRef, useState } from 'react';
+import { Button, Image, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Colors } from '../constants/Colors';
 
 export default function CameraScreen() {
@@ -12,9 +13,28 @@ export default function CameraScreen() {
   const cameraRef = useRef<CameraView>(null);
   const router = useRouter();
 
+  useEffect(() => {
+    if (permission && !permission.granted && permission.canAskAgain) {
+      requestPermission();
+    }
+  }, [permission, requestPermission]);
+
+  const pickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: false,
+      quality: 0.7,
+      base64: true,
+    });
+
+    if (!result.canceled) {
+      setPhoto(result.assets[0].uri);
+    }
+  };
+
   if (!permission) {
     // Camera permissions are still loading.
-    return <View />;
+    return <View style={styles.container} />;
   }
 
   if (!permission.granted) {
@@ -38,7 +58,7 @@ export default function CameraScreen() {
     }
   };
 
-  // If photo is taken, show preview
+  // If photo is taken (or selected), show preview
   if (photo) {
     return (
       <SafeAreaView style={styles.container}>
@@ -65,13 +85,19 @@ export default function CameraScreen() {
             <Ionicons name="close" size={30} color="white" />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.captureButton} onPress={takePicture}>
-            <View style={styles.captureInner} />
-          </TouchableOpacity>
+          <View style={styles.bottomControls}>
+            <TouchableOpacity style={styles.galleryButton} onPress={pickImage}>
+              <Ionicons name="images" size={28} color="white" />
+            </TouchableOpacity>
 
-          <TouchableOpacity style={styles.flipButton} onPress={() => setFacing(current => (current === 'back' ? 'front' : 'back'))}>
-            <Ionicons name="camera-reverse" size={30} color="white" />
-          </TouchableOpacity>
+            <TouchableOpacity style={styles.captureButton} onPress={takePicture}>
+              <View style={styles.captureInner} />
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.flipButton} onPress={() => setFacing(current => (current === 'back' ? 'front' : 'back'))}>
+              <Ionicons name="camera-reverse" size={30} color="white" />
+            </TouchableOpacity>
+          </View>
         </View>
       </CameraView>
     </View>
@@ -84,11 +110,14 @@ const styles = StyleSheet.create({
   camera: { flex: 1 },
   buttonContainer: {
     flex: 1,
-    flexDirection: 'row',
     backgroundColor: 'transparent',
     justifyContent: 'space-between',
-    alignItems: 'flex-end',
     padding: 30,
+  },
+  bottomControls: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 20,
   },
   captureButton: {
@@ -98,8 +127,9 @@ const styles = StyleSheet.create({
   captureInner: {
     width: 60, height: 60, borderRadius: 30, backgroundColor: 'white',
   },
-  closeButton: { padding: 10 },
+  closeButton: { alignSelf: 'flex-start', padding: 10, marginTop: 20 },
   flipButton: { padding: 10 },
+  galleryButton: { padding: 10 },
   
   // Preview Styles
   preview: { flex: 1, resizeMode: 'contain' },
