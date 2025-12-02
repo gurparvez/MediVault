@@ -48,12 +48,6 @@ export default function CalendarEvents({ events }: CalendarEventsProps) {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.sectionTitle}>Upcoming Events</Text>
-        <TouchableOpacity>
-          <Text style={styles.seeAll}>See All</Text>
-        </TouchableOpacity>
-      </View>
       <FlatList
         data={events}
         renderItem={renderEventItem}

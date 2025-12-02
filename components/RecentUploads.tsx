@@ -35,12 +35,6 @@ export default function RecentUploads({ documents }: RecentUploadsProps) {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.sectionTitle}>Recent Uploads</Text>
-        <TouchableOpacity>
-          <Text style={styles.seeAll}>See All</Text>
-        </TouchableOpacity>
-      </View>
       <View style={styles.listContainer}>
         {documents.map((doc) => (
             <View key={doc.id} style={{marginBottom: 12}}>

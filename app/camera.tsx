@@ -3,13 +3,15 @@ import { CameraType, CameraView, useCameraPermissions } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { Button, Image, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Button, Image, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Colors } from '../constants/Colors';
+import { apiService } from '../services/ApiService';
 
 export default function CameraScreen() {
   const [facing, setFacing] = useState<CameraType>('back');
   const [permission, requestPermission] = useCameraPermissions();
   const [photo, setPhoto] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
   const cameraRef = useRef<CameraView>(null);
   const router = useRouter();
 
@@ -29,6 +31,23 @@ export default function CameraScreen() {
 
     if (!result.canceled) {
       setPhoto(result.assets[0].uri);
+    }
+  };
+
+  const handleUpload = async () => {
+    if (!photo) return;
+
+    setIsUploading(true);
+    try {
+      await apiService.uploadDocument(photo);
+      Alert.alert('Success', 'Document uploaded successfully', [
+        { text: 'OK', onPress: () => router.back() }
+      ]);
+    } catch (error) {
+      Alert.alert('Error', 'Failed to upload document');
+      console.error(error);
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -64,13 +83,25 @@ export default function CameraScreen() {
       <SafeAreaView style={styles.container}>
         <Image source={{ uri: photo }} style={styles.preview} />
         <View style={styles.previewButtons}>
-          <TouchableOpacity style={styles.retakeBtn} onPress={() => setPhoto(null)}>
+          <TouchableOpacity 
+            style={styles.retakeBtn} 
+            onPress={() => setPhoto(null)}
+            disabled={isUploading}
+          >
              <Ionicons name="trash" size={24} color="white" />
              <Text style={styles.btnText}>Retake</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.saveBtn} onPress={() => alert('Sending to Gemini...')}>
-             <Ionicons name="checkmark-circle" size={24} color="white" />
-             <Text style={styles.btnText}>Process</Text>
+          <TouchableOpacity 
+            style={[styles.saveBtn, isUploading && { opacity: 0.7 }]} 
+            onPress={handleUpload}
+            disabled={isUploading}
+          >
+             {isUploading ? (
+               <ActivityIndicator color="white" size="small" />
+             ) : (
+               <Ionicons name="checkmark-circle" size={24} color="white" />
+             )}
+             <Text style={styles.btnText}>{isUploading ? 'Processing...' : 'Process'}</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>

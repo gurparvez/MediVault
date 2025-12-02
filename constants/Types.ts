@@ -7,6 +7,7 @@ export interface MedicalEvent {
   type: EventType;
   description?: string;
   location?: string;
+  status?: 'pending' | 'completed' | 'cancelled';
 }
 
 export type DocumentStatus = 'processing' | 'completed' | 'failed';
@@ -18,5 +19,8 @@ export interface MedicalDocument {
   uploadDate: string; // ISO string
   status: DocumentStatus;
   summary?: string;
+  category?: string;
+  context?: string;
+  embedding?: number[];
   extractedEvents?: MedicalEvent[];
 }
